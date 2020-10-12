@@ -1,3 +1,4 @@
+using API.Extensions;
 using API.Helpers;
 using AutoMapper;
 using Core.Interfaces;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis;
 
 namespace API
 {
@@ -25,9 +27,13 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(typeof(MappingProfiles));
-            services.AddScoped<IProductRepository, ProductRepository>(); 
-            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddControllers();
+            services.AddSingleton<IConnectionMultiplexer>(c => {
+                var configuration = ConfigurationOptions.Parse(_config
+                    .GetConnectionString("Redis"), true);
+                return ConnectionMultiplexer.Connect(configuration);
+            });
+            services.AddApplicationServices();
             services.AddDbContext<StoreContext>
                 (x=>x.UseSqlite(_config.GetConnectionString("Default")));
         }
