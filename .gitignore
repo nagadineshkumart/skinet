@@ -3,3 +3,6 @@ bin
 appsettings.json
 .vs
 *.db
+PerformanceAndLoadTest
+TestResults
+Local.testsettings
